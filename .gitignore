@@ -1,0 +1,17 @@
+# Extracted/copied game assets and converted media
+/extracted/
+
+# Generated reports
+/reports/*.csv
+/reports/summary.txt
+/reports/bundle_summary.txt
+/scripts/reports/
+
+# Python caches and local runtime noise
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local logs/temp files
+*.tmp
+*.log
