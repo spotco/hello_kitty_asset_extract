@@ -36,7 +36,7 @@ UnityPy.config.FALLBACK_UNITY_VERSION = '2021.3.56f2'
 |---|---|---|
 | `common.py` | Shared config, `load_unitypy()`, `iter_bundles()`, `write_csv()` | ✅ Done |
 | `inventory_assets.py` | Scans bundles → `reports/bundle_inventory.csv` + `bundle_summary.txt` | ✅ Done & fast |
-| `extract_character_glb.py` | Finds a renderer by name, exports one GLB + PNG textures | ✅ Works for single mesh parts; needs multi-part assembly |
+| `extract_character_glb.py` | Exports single-part or multi-part GLBs + PNG textures | ✅ Single-part textured exports work; ✅ current Cinnamoroll multi-part assembly works |
 
 ### Web viewer (`web_character_viewer/`)
 | File | Purpose | Status |
@@ -92,6 +92,13 @@ handler.process()
 - Current limitation: bind-pose skeleton is good for rest-pose rendering. Real animation retargeting
   may still need a complete/semantic humanoid hierarchy.
 
+### Transparency / face plates
+- Eye and mouth plate textures export as PNG RGBA and do contain real transparency.
+- glTF materials must explicitly set `alphaMode: "BLEND"` when the chosen base-color texture has
+  non-opaque alpha; otherwise Three.js renders the face plates as opaque quads.
+- The current exporter detects transparency from the exported base-color PNG and sets
+  `alphaMode: "BLEND"` for those materials.
+
 ### Animations
 - HKIA uses **Humanoid MuscleClip** format
 - `m_PositionCurves` / `m_RotationCurves` / `m_ScaleCurves` are **empty** for humanoid clips
@@ -141,14 +148,28 @@ handler.process()
   - Need to decide whether this default body mesh plus Cinnamoroll material/textures is the
     correct body for the mini character.
 - Texture/material status:
-  - Current exports have no textures.
   - Shared material pointer `6824069125264728142` resolves to `Material,Lit` in
     `680e794bd7287dcd6719ff90cfbf9cc3.bundle`.
   - Cinnamoroll texture objects exist in `f75e6233...`, including:
     `MiniStyle_Head_Cinnamoroll_C`, `_N`, `_X`, `MiniStyle_Tail_Cinnamoroll_C`,
     `MiniStyle_BodyShape_Cinnamoroll_C`, and eye/mouth plate textures.
-  - Need dependency/material resolution plus material property inspection to connect those textures
-    to exported glTF materials.
+  - Dependency/material resolution is now implemented in the exporter.
+  - When shared materials such as `Lit` or `EmoteMesh_FacePlate` are textureless or generic,
+    the exporter falls back to matching bundle-local character materials or plate textures.
+  - Current textured single-part exports work for head, tail, body, eyes, and mouth.
+  - Eye and mouth exports specifically use `Shared_EyePlateTexture_Cinnamoroll_C` and
+    `Shared_MouthPlateTexture_Cinnamoroll_C` as `_BaseMap`, with glTF alpha blending enabled.
+ - Multi-part export status:
+   - `python scripts\extract_character_glb.py --name cinnamoroll --bundle-hash f75e6233b13254a0a5e316a96d0d3114 --multi --slug cinnamoroll_full`
+     now writes one GLB containing body, head, tail, eyes, and mouth as separate nodes.
+   - Body/head/tail geometry comes from the mesh source bundle `f75e6233...`, but final part placement
+     must come from the assembled prefab bundle `222c0db...`.
+   - Face parts (`Shared_EyeMeshSet_Cinnamoroll(Clone)`, `Shared_MouthMeshSet_Cinnamoroll(Clone)`)
+     are not positioned correctly if exported using only the standalone source-bundle transforms:
+     they need prefab-relative transforms from the assembled `Cinnamoroll` hierarchy.
+   - Current fix: multi-part export computes node matrices relative to prefab root `Cinnamoroll`
+     using the assembled clone hierarchy from `222c0db...`; this correctly places eyes and mouth
+     on the head.
 
 ---
 
@@ -244,7 +265,7 @@ Implement a helper in `extract_character_glb.py` or a new shared module:
 - Cache loaded dependency envs by bundle hash.
 
 ### 6. Texture the meshes
-This is a required milestone, not just polish. Current GLBs use fallback white materials.
+This is a required milestone, not just polish.
 
 Plan:
 - Extend dependency resolution to `Material` and `Texture2D`, not only meshes.
@@ -261,6 +282,9 @@ Plan:
   after base color works.
 - Viewer acceptance check: texture count in `index.json` is nonzero and the model is no longer
   plain white.
+Status:
+- ✅ Base-color texture export works for the current single-part head/tail/body/eye/mouth tests.
+- ✅ Face-plate transparency is respected in the current exporter.
 
 ### 7. Export a multi-mesh GLB
 Extend or create an exporter that accepts a character part manifest, for example:
@@ -279,6 +303,12 @@ Pragmatic first milestone:
 - Then apply resolved textures/materials.
 - Then unify skeletons where possible.
 - Then add animation preview.
+Status:
+- ✅ Current exporter writes a single-scene multi-part Cinnamoroll GLB.
+- ✅ Current multi-part export uses prefab-relative transforms from `222c0db...` so eyes and mouth
+  are aligned to the head instead of staying at origin.
+- Current limitation: the multi-part export is static assembly only; it does not yet unify a shared
+  skeleton across the parts.
 
 ### 8. Viewer support for multi-part assets and animation
 The existing viewer can load any GLB from `index.json`, so it may work once the GLB is valid. Still verify:

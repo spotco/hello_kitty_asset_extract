@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json as json_mod
 import math
 import re
@@ -22,6 +23,19 @@ TEXTURE_PROPERTY_PRIORITY = [
 ]
 DEPENDENCY_OBJECT_TYPES = {"Mesh", "Material", "Texture2D"}
 GENERIC_MATERIAL_NAMES = {"Lit", "EmoteMesh_FacePlate"}
+MULTIPART_CHARACTER_PARTS = {
+    "cinnamoroll": {
+        "assembly_bundle_hash": "222c0db735425c4fa287cca209345a62",
+        "assembly_root_name": "Cinnamoroll",
+        "parts": [
+            {"part_name": "body", "target_name": "MiniStyle_BodyShape_Cinnamoroll", "assembly_target_name": "MiniStyle_BodyShape_Default(Clone)"},
+            {"part_name": "head", "target_name": "MiniStyle_Head_Cinnamoroll", "assembly_target_name": "MiniStyle_Head_Cinnamoroll(Clone)"},
+            {"part_name": "tail", "target_name": "MiniStyle_Tail_Cinnamoroll", "assembly_target_name": "MiniStyle_Tail_Cinnamoroll(Clone)"},
+            {"part_name": "eyes", "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteA", "assembly_target_name": "Shared_EyeMeshSet_Cinnamoroll(Clone)"},
+            {"part_name": "mouth", "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteA", "assembly_target_name": "Shared_MouthMeshSet_Cinnamoroll(Clone)"},
+        ],
+    }
+}
 
 
 def pack_glb(gltf_json: dict, bin_data: bytes) -> bytes:
@@ -202,6 +216,155 @@ def quat_from_obj(value: Any) -> list[float]:
     ]
 
 
+def iter_game_object_component_pptrs(game_object: Any):
+    for component in list(getattr(game_object, "m_Component", []) or []):
+        for candidate in (
+            getattr(component, "component", None),
+            getattr(component, "m_Component", None),
+            getattr(component, "first", None),
+            getattr(component, "second", None),
+        ):
+            if pptr_path_id(candidate):
+                yield candidate
+                break
+
+
+def read_game_object_transform(game_object: Any, resolver: DependencyResolver) -> Any | None:
+    for component_pptr in iter_game_object_component_pptrs(game_object):
+        component = read_pptr(component_pptr, resolver)
+        if component is not None and type(component).__name__ in {"Transform", "RectTransform"}:
+            return component
+    return None
+
+
+def transform_to_node_fields(transform: Any) -> dict[str, Any]:
+    if transform is None:
+        return {}
+    return {
+        "translation": unity_to_gltf_vec3(vec3_from_obj(getattr(transform, "m_LocalPosition", None), (0.0, 0.0, 0.0))),
+        "rotation": unity_to_gltf_quat(quat_from_obj(getattr(transform, "m_LocalRotation", None))),
+        "scale": vec3_from_obj(getattr(transform, "m_LocalScale", None), (1.0, 1.0, 1.0)),
+        "transform_path_id": getattr(transform, "path_id", 0),
+    }
+
+
+def quaternion_to_rotation_rows(quaternion: list[float]) -> list[list[float]]:
+    x, y, z, w = quaternion
+    xx, yy, zz = x * x, y * y, z * z
+    xy, xz, yz = x * y, x * z, y * z
+    wx, wy, wz = w * x, w * y, w * z
+    return [
+        [1.0 - 2.0 * (yy + zz), 2.0 * (xy - wz), 2.0 * (xz + wy)],
+        [2.0 * (xy + wz), 1.0 - 2.0 * (xx + zz), 2.0 * (yz - wx)],
+        [2.0 * (xz - wy), 2.0 * (yz + wx), 1.0 - 2.0 * (xx + yy)],
+    ]
+
+
+def make_trs_rows(translation: list[float], rotation: list[float], scale: list[float]) -> list[list[float]]:
+    rotation_rows = quaternion_to_rotation_rows(rotation)
+    rows = [[0.0, 0.0, 0.0, 0.0] for _ in range(4)]
+    for row in range(3):
+        rows[row][0] = rotation_rows[row][0] * scale[0]
+        rows[row][1] = rotation_rows[row][1] * scale[1]
+        rows[row][2] = rotation_rows[row][2] * scale[2]
+        rows[row][3] = translation[row]
+    rows[3] = [0.0, 0.0, 0.0, 1.0]
+    return rows
+
+
+def multiply_rows(a: list[list[float]], b: list[list[float]]) -> list[list[float]]:
+    return [
+        [sum(a[row][index] * b[index][col] for index in range(4)) for col in range(4)]
+        for row in range(4)
+    ]
+
+
+def invert_matrix4_rows(matrix: list[list[float]]) -> list[list[float]]:
+    augmented = [row[:] + [1.0 if row_index == col_index else 0.0 for col_index in range(4)] for row_index, row in enumerate(matrix)]
+
+    for col in range(4):
+        pivot = max(range(col, 4), key=lambda row: abs(augmented[row][col]))
+        if abs(augmented[pivot][col]) < 1e-12:
+            raise ValueError("Matrix is not invertible")
+        if pivot != col:
+            augmented[col], augmented[pivot] = augmented[pivot], augmented[col]
+
+        scale = augmented[col][col]
+        augmented[col] = [value / scale for value in augmented[col]]
+        for row in range(4):
+            if row == col:
+                continue
+            factor = augmented[row][col]
+            if factor:
+                augmented[row] = [value - factor * augmented[col][index] for index, value in enumerate(augmented[row])]
+
+    return [row[4:] for row in augmented]
+
+
+def unity_matrix_rows_from_transform(transform: Any) -> list[list[float]]:
+    translation = vec3_from_obj(getattr(transform, "m_LocalPosition", None), (0.0, 0.0, 0.0))
+    rotation = quat_from_obj(getattr(transform, "m_LocalRotation", None))
+    scale = vec3_from_obj(getattr(transform, "m_LocalScale", None), (1.0, 1.0, 1.0))
+    return make_trs_rows(translation, rotation, scale)
+
+
+def rows_matrix_to_gltf_columns(rows: list[list[float]]) -> list[float]:
+    signs = [-1.0, 1.0, 1.0, 1.0]
+    converted = [[rows[row][col] * signs[row] * signs[col] for col in range(4)] for row in range(4)]
+    return [converted[row][col] for col in range(4) for row in range(4)]
+
+
+def build_transform_world_rows(transform: Any, resolver: DependencyResolver | None = None) -> list[list[float]]:
+    current = transform
+    world = [[1.0 if row == col else 0.0 for col in range(4)] for row in range(4)]
+    chain: list[Any] = []
+    while current is not None:
+        chain.append(current)
+        current = read_pptr(getattr(current, "m_Father", None), resolver, {"Transform"})
+    for item in reversed(chain):
+        world = multiply_rows(world, unity_matrix_rows_from_transform(item))
+    return world
+
+
+def find_game_object_by_name(env: Any, target_name: str) -> Any | None:
+    for obj in env.objects:
+        if obj.type.name != "GameObject":
+            continue
+        try:
+            go = obj.read()
+        except Exception:
+            continue
+        if getattr(go, "m_Name", "") == target_name:
+            return go
+    return None
+
+
+def relative_node_transform_from_prefab(
+    prefab_env: Any,
+    assembly_root_name: str,
+    assembly_target_name: str,
+    resolver: DependencyResolver,
+) -> dict[str, Any]:
+    root_go = find_game_object_by_name(prefab_env, assembly_root_name)
+    target_go = find_game_object_by_name(prefab_env, assembly_target_name)
+    if root_go is None or target_go is None:
+        raise RuntimeError(f"Could not resolve prefab transform source {assembly_target_name} under {assembly_root_name}")
+
+    root_transform = read_game_object_transform(root_go, resolver)
+    target_transform = read_game_object_transform(target_go, resolver)
+    if root_transform is None or target_transform is None:
+        raise RuntimeError(f"Missing transform for prefab source {assembly_target_name}")
+
+    root_world = build_transform_world_rows(root_transform, resolver)
+    target_world = build_transform_world_rows(target_transform, resolver)
+    relative_rows = multiply_rows(invert_matrix4_rows(root_world), target_world)
+    return {
+        "matrix": rows_matrix_to_gltf_columns(relative_rows),
+        "prefab_root_name": assembly_root_name,
+        "prefab_target_name": assembly_target_name,
+    }
+
+
 def score_name_match(target_lower: str, *texts: str) -> int:
     target_tokens = {token for token in re.split(r"[^a-z0-9]+", target_lower) if token}
     best = 0
@@ -304,6 +467,8 @@ def find_static_renderers(env, target_name: str, resolver: DependencyResolver) -
                 continue
             name = getattr(go, "m_Name", "") or mesh_filter_names.get(go_path_id, "") or "static_mesh"
             mesh_name = object_name(mesh, resolver=resolver)
+            transform = read_game_object_transform(go, resolver)
+            node_transform = transform_to_node_fields(transform)
             score = score_name_match(target_lower, name, mesh_name)
             candidates.append(
                 {
@@ -315,6 +480,7 @@ def find_static_renderers(env, target_name: str, resolver: DependencyResolver) -
                     "materials": list(getattr(data, "m_Materials", []) or []),
                     "bones": [],
                     "texture_hint_names": [name, mesh_name],
+                    "node_transform": node_transform,
                     "score": score,
                 }
             )
@@ -338,6 +504,8 @@ def select_character_target(env, target_name: str, resolver: DependencyResolver)
             go = read_pptr(getattr(data, "m_GameObject", None), resolver, {"GameObject"})
             renderer_name = getattr(go, "m_Name", "") if go is not None else object_name(data, "skinned_mesh", resolver)
             mesh_name = object_name(mesh, resolver=resolver)
+            transform = read_game_object_transform(go, resolver) if go is not None else None
+            node_transform = transform_to_node_fields(transform)
             material_count = len(getattr(data, "m_Materials", []) or [])
             bone_count = len(getattr(data, "m_Bones", []) or [])
             combined = " ".join(part for part in [renderer_name, mesh_name] if part)
@@ -354,6 +522,7 @@ def select_character_target(env, target_name: str, resolver: DependencyResolver)
                     "materials": list(getattr(data, "m_Materials", []) or []),
                     "bones": list(getattr(data, "m_Bones", []) or []),
                     "texture_hint_names": [renderer_name, mesh_name],
+                    "node_transform": node_transform,
                     "score": score,
                 }
             )
@@ -370,6 +539,43 @@ def select_character_target(env, target_name: str, resolver: DependencyResolver)
         f"with {len(chosen['materials'])} material(s) and {len(chosen['bones'])} bone(s)"
     )
     return chosen
+
+
+def select_static_part_target(env, target_name: str, resolver: DependencyResolver) -> dict[str, Any] | None:
+    candidates = find_static_renderers(env, target_name, resolver)
+    target_lower = target_name.lower()
+    exact = [candidate for candidate in candidates if candidate["renderer_name"].lower() == target_lower or candidate["mesh_name"].lower() == target_lower]
+    selected = exact or candidates
+    if not selected:
+        return None
+    selected.sort(key=lambda item: (-item["score"], item["renderer_name"]))
+    return selected[0]
+
+
+def resolve_multi_part_targets(env, target_name: str, resolver: DependencyResolver) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    manifest = MULTIPART_CHARACTER_PARTS.get(target_name.lower())
+    if not manifest:
+        raise SystemExit(f"No multi-part manifest configured for '{target_name}'")
+
+    prefab_env = resolver.load_bundle_env(manifest["assembly_bundle_hash"])
+    parts: list[dict[str, Any]] = []
+    for spec in manifest["parts"]:
+        target = select_static_part_target(env, spec["target_name"], resolver)
+        if target is None:
+            raise SystemExit(f"Could not find static part '{spec['target_name']}' for multi-part export")
+        parts.append(
+            {
+                **target,
+                "part_name": spec["part_name"],
+                "node_transform": relative_node_transform_from_prefab(
+                    prefab_env,
+                    manifest["assembly_root_name"],
+                    spec["assembly_target_name"],
+                    resolver,
+                ),
+            }
+        )
+    return parts, manifest
 
 
 def iter_named_entries(value: Any):
@@ -430,7 +636,17 @@ def export_texture_data(
     path = textures_dir / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     image.save(path)
-    info = {"path_id": path_id, "name": object_name(texture, "texture", resolver), "file": filename, "uri": f"textures/{filename}"}
+    alpha_channel = image.getchannel("A") if "A" in image.getbands() else None
+    alpha_extrema = alpha_channel.getextrema() if alpha_channel is not None else None
+    has_transparency = bool(alpha_extrema is not None and alpha_extrema[0] < 255)
+    info = {
+        "path_id": path_id,
+        "name": object_name(texture, "texture", resolver),
+        "file": filename,
+        "uri": f"textures/{filename}",
+        "has_alpha": alpha_channel is not None,
+        "has_transparency": has_transparency,
+    }
     texture_cache[path_id] = info
     print(f"  exported texture {path.name}")
     return info
@@ -608,6 +824,9 @@ def collect_materials(
         }
         if base_texture_index is not None:
             material_json["pbrMetallicRoughness"]["baseColorTexture"] = {"index": base_texture_index}
+        if preferred is not None and preferred["property"] in {"_BaseMap", "_MainTex", "_BaseColorMap", "_BaseColorTex", "_Diffuse"}:
+            if preferred.get("has_transparency"):
+                material_json["alphaMode"] = "BLEND"
         materials_json.append(material_json)
         summary = {"name": material_name, "textures": exported_infos}
         if fallback_material_name is not None:
@@ -952,6 +1171,209 @@ def build_gltf(
     return gltf_json, bytes(buffer), metadata
 
 
+def build_multi_gltf(
+    parts: list[dict[str, Any]],
+    out_dir: Path,
+    resolver: DependencyResolver,
+    lookup: BundleAssetLookup,
+) -> tuple[dict[str, Any], bytes, dict[str, Any]]:
+    from UnityPy.helpers.MeshHelper import MeshHandler  # type: ignore
+
+    buffer = bytearray()
+    buffer_views: list[dict[str, Any]] = []
+    accessors: list[dict[str, Any]] = []
+    meshes_json: list[dict[str, Any]] = []
+    nodes: list[dict[str, Any]] = [{"name": "character", "children": []}]
+    materials_json: list[dict[str, Any]] = []
+    images_json: list[dict[str, Any]] = []
+    textures_json: list[dict[str, Any]] = []
+    parts_metadata: list[dict[str, Any]] = []
+    total_vertices = 0
+    total_triangles = 0
+
+    def align_buffer() -> None:
+        padding = (-len(buffer)) % 4
+        if padding:
+            buffer.extend(b"\x00" * padding)
+
+    def add_accessor(raw: bytes, count: int, component_type: int, accessor_type: str, *, min_vals=None, max_vals=None, target=None):
+        align_buffer()
+        offset = len(buffer)
+        buffer.extend(raw)
+        view = {"buffer": 0, "byteOffset": offset, "byteLength": len(raw)}
+        if target is not None:
+            view["target"] = target
+        buffer_views.append(view)
+        accessor = {
+            "bufferView": len(buffer_views) - 1,
+            "componentType": component_type,
+            "count": count,
+            "type": accessor_type,
+        }
+        if min_vals is not None:
+            accessor["min"] = min_vals
+        if max_vals is not None:
+            accessor["max"] = max_vals
+        accessors.append(accessor)
+        return len(accessors) - 1
+
+    for part in parts:
+        mesh = part["mesh"]
+        handler = MeshHandler(mesh)
+        handler.process()
+
+        vertices = list(getattr(handler, "m_Vertices", []) or [])
+        if not vertices:
+            raise RuntimeError(f"Mesh {object_name(mesh, 'mesh', resolver)} has no vertices")
+        normals = list(getattr(handler, "m_Normals", []) or [])
+        uvs = list(getattr(handler, "m_UV0", []) or [])
+        triangle_groups = list(handler.get_triangles() or [])
+        if not triangle_groups:
+            raise RuntimeError(f"Mesh {object_name(mesh, 'mesh', resolver)} has no triangle data")
+
+        print(f"Adding multi-part mesh '{object_name(mesh, 'mesh', resolver)}' ({part['part_name']})")
+
+        material_summaries, material_payload = collect_materials(
+            part["materials"],
+            out_dir,
+            resolver,
+            lookup,
+            part.get("texture_hint_names", [part["renderer_name"]]),
+        )
+        local_materials, local_images, local_textures = material_payload
+        image_offset = len(images_json)
+        texture_offset = len(textures_json)
+        material_offset = len(materials_json)
+
+        images_json.extend(copy.deepcopy(local_images))
+        for texture in local_textures:
+            texture_json = copy.deepcopy(texture)
+            texture_json["source"] = texture_json.get("source", 0) + image_offset
+            textures_json.append(texture_json)
+        for material in local_materials:
+            material_json = copy.deepcopy(material)
+            base_color = material_json.get("pbrMetallicRoughness", {}).get("baseColorTexture")
+            if base_color is not None:
+                base_color["index"] += texture_offset
+            materials_json.append(material_json)
+
+        converted_positions = [unity_to_gltf_vec3(v) for v in vertices]
+        position_bytes = b"".join(struct.pack("<3f", *value) for value in converted_positions)
+        mins = [min(point[i] for point in converted_positions) for i in range(3)]
+        maxs = [max(point[i] for point in converted_positions) for i in range(3)]
+        position_accessor = add_accessor(position_bytes, len(converted_positions), 5126, "VEC3", min_vals=mins, max_vals=maxs, target=34962)
+
+        if normals:
+            converted_normals = [unity_to_gltf_vec3(n[:3]) for n in normals]
+        else:
+            converted_normals = [[0.0, 1.0, 0.0] for _ in vertices]
+        normal_accessor = add_accessor(
+            b"".join(struct.pack("<3f", *value) for value in converted_normals),
+            len(converted_normals),
+            5126,
+            "VEC3",
+            target=34962,
+        )
+
+        if uvs:
+            converted_uvs = [[float(uv[0]), 1.0 - float(uv[1])] for uv in uvs]
+        else:
+            converted_uvs = [[0.0, 0.0] for _ in vertices]
+        uv_accessor = add_accessor(
+            b"".join(struct.pack("<2f", *value) for value in converted_uvs),
+            len(converted_uvs),
+            5126,
+            "VEC2",
+            target=34962,
+        )
+
+        primitives: list[dict[str, Any]] = []
+        part_triangles = 0
+        for submesh_index, triangles in enumerate(triangle_groups):
+            flat_indices: list[int] = []
+            for a, b, c in triangles:
+                flat_indices.extend([int(c), int(b), int(a)])
+            part_triangles += len(triangles)
+            if not flat_indices:
+                continue
+            index_accessor = add_accessor(
+                b"".join(struct.pack("<I", value) for value in flat_indices),
+                len(flat_indices),
+                5125,
+                "SCALAR",
+                target=34963,
+            )
+            primitives.append(
+                {
+                    "attributes": {
+                        "POSITION": position_accessor,
+                        "NORMAL": normal_accessor,
+                        "TEXCOORD_0": uv_accessor,
+                    },
+                    "indices": index_accessor,
+                    "material": material_offset + min(submesh_index, len(local_materials) - 1),
+                    "mode": 4,
+                }
+            )
+
+        mesh_index = len(meshes_json)
+        meshes_json.append({"name": object_name(mesh, part["renderer_name"], resolver), "primitives": primitives})
+
+        node_index = len(nodes)
+        node = {"name": part["renderer_name"], "mesh": mesh_index}
+        node_transform = part.get("node_transform", {})
+        if "matrix" in node_transform:
+            node["matrix"] = node_transform["matrix"]
+        else:
+            node.update({key: value for key, value in node_transform.items() if key in {"translation", "rotation", "scale"}})
+        nodes.append(node)
+        nodes[0]["children"].append(node_index)
+
+        total_vertices += len(vertices)
+        total_triangles += part_triangles
+        parts_metadata.append(
+            {
+                "part_name": part["part_name"],
+                "renderer_name": part["renderer_name"],
+                "mesh_name": object_name(mesh, part["renderer_name"], resolver),
+                "vertex_count": len(vertices),
+                "triangle_count": part_triangles,
+                "transform": node_transform,
+                "materials": material_summaries,
+            }
+        )
+
+    gltf_json = {
+        "asset": {"version": "2.0", "generator": "hkia-extract"},
+        "scene": 0,
+        "scenes": [{"name": "scene", "nodes": [0]}],
+        "nodes": nodes,
+        "meshes": meshes_json,
+        "materials": materials_json,
+        "buffers": [{"byteLength": len(buffer)}],
+        "bufferViews": buffer_views,
+        "accessors": accessors,
+    }
+    if images_json:
+        gltf_json["images"] = images_json
+        gltf_json["textures"] = textures_json
+
+    metadata = {
+        "mesh_name": "multipart_character",
+        "renderer_name": "multipart_character",
+        "vertex_count": total_vertices,
+        "submesh_count": sum(len(mesh["primitives"]) for mesh in meshes_json),
+        "triangle_count": total_triangles,
+        "skin_used": False,
+        "skin_requested": False,
+        "skin_forced_static": True,
+        "skeleton_source": None,
+        "part_count": len(parts),
+        "parts": parts_metadata,
+    }
+    return gltf_json, bytes(buffer), metadata
+
+
 def collect_animation_names(env, target_name: str) -> list[str]:
     target_lower = target_name.lower()
     names: list[str] = []
@@ -1003,6 +1425,7 @@ def main() -> int:
     parser.add_argument("--name", required=True, help="Character name to search for, e.g. cinnamoroll")
     parser.add_argument("--bundle-hash", help="Optional specific bundle hash (with or without .bundle)")
     parser.add_argument("--slug", help="Optional output slug. Defaults to a safe version of --name.")
+    parser.add_argument("--multi", action="store_true", help="Assemble a configured multi-part character GLB instead of exporting a single best-matching mesh.")
     parser.add_argument("--no-skin", action="store_true", help="Export geometry without skin, joints, weights, or inverse bind matrices.")
     parser.add_argument("--inventory", type=Path, default=REPORTS / "bundle_inventory.csv", help="Inventory CSV used to resolve external Mesh, Material, and Texture2D pointers.")
     parser.add_argument(
@@ -1030,25 +1453,35 @@ def main() -> int:
     bundle_path = chosen["bundle"]
     env = load_env(bundle_path, UnityPy)
     lookup = BundleAssetLookup(env, resolver)
-    target = select_character_target(env, args.name, resolver)
-    if target is None:
-        raise SystemExit(f"No suitable renderer found in bundle {bundle_path.name}")
+    target = None
+    parts = None
+    manifest = None
+    if args.multi:
+        parts, manifest = resolve_multi_part_targets(env, args.name, resolver)
+    else:
+        target = select_character_target(env, args.name, resolver)
+        if target is None:
+            raise SystemExit(f"No suitable renderer found in bundle {bundle_path.name}")
 
-    mesh = target["mesh"]
-    slug = safe_name((args.slug or args.name).lower())
+    default_slug = f"{args.name}_full" if args.multi else args.name
+    slug = safe_name((args.slug or default_slug).lower())
     out_dir = EXTRACTED / "characters" / slug
     out_dir.mkdir(parents=True, exist_ok=True)
     clear_previous_textures(out_dir / "textures")
 
-    gltf_json, bin_data, metadata = build_gltf(
-        mesh,
-        target,
-        out_dir,
-        resolver,
-        lookup,
-        force_static=args.no_skin,
-        skeleton_source=args.skeleton_source,
-    )
+    if args.multi:
+        gltf_json, bin_data, metadata = build_multi_gltf(parts or [], out_dir, resolver, lookup)
+    else:
+        mesh = target["mesh"]
+        gltf_json, bin_data, metadata = build_gltf(
+            mesh,
+            target,
+            out_dir,
+            resolver,
+            lookup,
+            force_static=args.no_skin,
+            skeleton_source=args.skeleton_source,
+        )
     glb_bytes = pack_glb(gltf_json, bin_data)
     glb_path = out_dir / "character.glb"
     glb_path.write_bytes(glb_bytes)
@@ -1065,14 +1498,20 @@ def main() -> int:
             "glb": str(glb_path).replace("\\", "/"),
         }
     )
+    if args.multi:
+        metadata["assembly_bundle"] = f"{manifest['assembly_bundle_hash']}.bundle"
+        metadata["assembly_root_name"] = manifest["assembly_root_name"]
     write_json(metadata_path, metadata)
     print(f"Wrote {metadata_path}")
 
-    display_name = target["renderer_name"]
-    if args.no_skin:
-        display_name = f"{display_name} (static control)"
-    elif args.skeleton_source == "bind-pose" and args.slug:
-        display_name = f"{display_name} (bind-pose skeleton)"
+    if args.multi:
+        display_name = f"{args.name} (multi-part)"
+    else:
+        display_name = target["renderer_name"]
+        if args.no_skin:
+            display_name = f"{display_name} (static control)"
+        elif args.skeleton_source == "bind-pose" and args.slug:
+            display_name = f"{display_name} (bind-pose skeleton)"
 
     entry = {
         "name": display_name,

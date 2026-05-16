@@ -32,6 +32,14 @@ This writes extracted files under `extracted\characters\<name>\` and updates `ex
 Run `python scripts\inventory_assets.py` first so external mesh, material, and texture pointers can be resolved from `reports\bundle_inventory.csv`.
 When a shared material such as `Lit` or `EmoteMesh_FacePlate` is textureless, the extractor falls back to matching bundle-local character materials or plate textures when available.
 
+## Extract a multi-part Cinnamoroll GLB
+
+```bash
+python scripts\extract_character_glb.py --name cinnamoroll --bundle-hash f75e6233b13254a0a5e316a96d0d3114 --multi --slug cinnamoroll_full
+```
+
+This writes one GLB containing the current body, head, tail, eyes, and mouth parts as separate nodes in a single scene.
+
 ## Inspect the Cinnamoroll source bundle
 
 ```bash
