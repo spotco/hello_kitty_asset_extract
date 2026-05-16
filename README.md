@@ -29,6 +29,16 @@ python scripts\extract_character_glb.py --name cinnamoroll
 ```
 
 This writes extracted files under `extracted\characters\<name>\` and updates `extracted\characters\index.json`.
+Run `python scripts\inventory_assets.py` first so external mesh, material, and texture pointers can be resolved from `reports\bundle_inventory.csv`.
+When a shared material such as `Lit` or `EmoteMesh_FacePlate` is textureless, the extractor falls back to matching bundle-local character materials or plate textures when available.
+
+## Inspect the Cinnamoroll source bundle
+
+```bash
+python scripts\inspect_cinnamoroll_parts.py
+```
+
+This writes `reports\cinnamoroll_parts_inspection.json` with the key Cinnamoroll part GameObjects, their transform hierarchy, and mesh/material pointer resolution using `reports\bundle_inventory.csv`.
 
 ## Run the web viewer
 

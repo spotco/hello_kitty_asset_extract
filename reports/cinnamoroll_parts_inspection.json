@@ -1,0 +1,1995 @@
+{
+  "bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+  "bundle_path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Hello Kitty Island Adventure\\Hello Kitty_Data\\StreamingAssets\\aa\\StandaloneWindows64\\f75e6233b13254a0a5e316a96d0d3114.bundle",
+  "inventory_csv": "E:\\dev\\hello_kitty_asset_extract\\reports\\bundle_inventory.csv",
+  "target_names": [
+    "MiniStyle_BodyShape_Cinnamoroll",
+    "MiniStyle_Head_Cinnamoroll",
+    "MiniStyle_Tail_Cinnamoroll",
+    "Shared_EyeMeshSet_Cinnamoroll",
+    "Shared_MouthMeshSet_Cinnamoroll",
+    "Shared_EyePlateTexture_Cinnamoroll",
+    "Shared_MouthPlateTexture_Cinnamoroll"
+  ],
+  "matches": [
+    {
+      "target_name": "MiniStyle_BodyShape_Cinnamoroll",
+      "game_object_path_id": -7438832792556407681,
+      "transform": {
+        "path_id": 5074367282935690367,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": {
+        "path_id": 5583045188429345919,
+        "mesh_pointer": {
+          "file_id": 17,
+          "path_id": -4862095986763463643,
+          "resolved_bundle_hash": "fd46aab3373a111f81315c76691b8c5c",
+          "resolved_object_type": "Mesh",
+          "resolved_object_name": "MiniStyle_BodyShape_Default",
+          "resolution": "inventory",
+          "inventory_candidates": [
+            {
+              "bundle_hash": "fd46aab3373a111f81315c76691b8c5c",
+              "object_type": "Mesh",
+              "object_name": "MiniStyle_BodyShape_Default",
+              "path_id": "-4862095986763463643"
+            }
+          ]
+        }
+      },
+      "renderers": [
+        {
+          "path_id": -3108052485766122369,
+          "type": "MeshRenderer",
+          "materials": [
+            {
+              "file_id": 0,
+              "path_id": 4945412610986209805,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Material",
+              "resolved_object_name": "MiniStyle_BodyShape_Cinnamoroll",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          ]
+        }
+      ],
+      "children": []
+    },
+    {
+      "target_name": "MiniStyle_Head_Cinnamoroll",
+      "game_object_path_id": -7398283487146572190,
+      "transform": {
+        "path_id": 6950531043787900514,
+        "type": "Transform",
+        "parent_path_id": 5883322088440825442,
+        "parent_name": "MiniStyle_Head_Cinnamoroll",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [
+        {
+          "path_id": 1016921067326178914,
+          "type": "SkinnedMeshRenderer",
+          "materials": [
+            {
+              "file_id": 9,
+              "path_id": 6824069125264728142,
+              "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+              "resolved_object_type": "Material",
+              "resolved_object_name": "Lit",
+              "resolution": "inventory",
+              "inventory_candidates": [
+                {
+                  "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "object_type": "Material",
+                  "object_name": "Lit",
+                  "path_id": "6824069125264728142"
+                }
+              ]
+            }
+          ],
+          "mesh_pointer": {
+            "file_id": 0,
+            "path_id": 4198458408677967458,
+            "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+            "resolved_object_type": "Mesh",
+            "resolved_object_name": "MiniStyle_Head_Cinnamoroll",
+            "resolution": "internal",
+            "inventory_candidates": []
+          },
+          "bone_count": 42
+        }
+      ],
+      "children": []
+    },
+    {
+      "target_name": "MiniStyle_Head_Cinnamoroll",
+      "game_object_path_id": -6979819965891574174,
+      "transform": {
+        "path_id": 5883322088440825442,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": [
+        {
+          "target_name": "MiniStyle_Head_Cinnamoroll",
+          "game_object_path_id": -7398283487146572190,
+          "transform": {
+            "path_id": 6950531043787900514,
+            "type": "Transform",
+            "parent_path_id": 5883322088440825442,
+            "parent_name": "MiniStyle_Head_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": null,
+          "renderers": [
+            {
+              "path_id": 1016921067326178914,
+              "type": "SkinnedMeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ],
+              "mesh_pointer": {
+                "file_id": 0,
+                "path_id": 4198458408677967458,
+                "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+                "resolved_object_type": "Mesh",
+                "resolved_object_name": "MiniStyle_Head_Cinnamoroll",
+                "resolution": "internal",
+                "inventory_candidates": []
+              },
+              "bone_count": 42
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "target_name": "MiniStyle_Head_Cinnamoroll",
+      "game_object_path_id": 8354371899283232512,
+      "transform": {
+        "path_id": 7661692738585253632,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          -0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": {
+        "path_id": 5082420215648966400,
+        "mesh_pointer": {
+          "file_id": 0,
+          "path_id": 4198458408677967458,
+          "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+          "resolved_object_type": "Mesh",
+          "resolved_object_name": "MiniStyle_Head_Cinnamoroll",
+          "resolution": "internal",
+          "inventory_candidates": []
+        }
+      },
+      "renderers": [
+        {
+          "path_id": 4126897413954426624,
+          "type": "MeshRenderer",
+          "materials": [
+            {
+              "file_id": 0,
+              "path_id": -9128184396492140234,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Material",
+              "resolved_object_name": "MiniStyle_Head_Cinnamoroll",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          ]
+        }
+      ],
+      "children": []
+    },
+    {
+      "target_name": "MiniStyle_Tail_Cinnamoroll",
+      "game_object_path_id": 4419138633248430347,
+      "transform": {
+        "path_id": -4441015442974680821,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          -0.7071068286895752,
+          -0.0,
+          -0.0,
+          0.7071067094802856
+        ],
+        "local_scale": [
+          1.0,
+          0.9999998807907104,
+          0.9999998807907104
+        ]
+      },
+      "mesh_filter": {
+        "path_id": -8438864676560086773,
+        "mesh_pointer": {
+          "file_id": 0,
+          "path_id": 2204217602977403589,
+          "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+          "resolved_object_type": "Mesh",
+          "resolved_object_name": "MiniStyle_Tail_Cinnamoroll",
+          "resolution": "internal",
+          "inventory_candidates": []
+        }
+      },
+      "renderers": [
+        {
+          "path_id": 1437205250819315979,
+          "type": "MeshRenderer",
+          "materials": [
+            {
+              "file_id": 0,
+              "path_id": 89894850075270846,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Material",
+              "resolved_object_name": "MiniStyle_Tail_Cinnamoroll",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          ]
+        }
+      ],
+      "children": []
+    },
+    {
+      "target_name": "MiniStyle_Tail_Cinnamoroll",
+      "game_object_path_id": 8107032363643671237,
+      "transform": {
+        "path_id": -4390074020664470843,
+        "type": "Transform",
+        "parent_path_id": 8381296189517959877,
+        "parent_name": "MiniStyle_Tail_Cinnamoroll",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          -0.7071068286895752,
+          0.0,
+          -0.0,
+          0.7071067094802856
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [
+        {
+          "path_id": 7910602444779459269,
+          "type": "SkinnedMeshRenderer",
+          "materials": [
+            {
+              "file_id": 9,
+              "path_id": 6824069125264728142,
+              "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+              "resolved_object_type": "Material",
+              "resolved_object_name": "Lit",
+              "resolution": "inventory",
+              "inventory_candidates": [
+                {
+                  "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "object_type": "Material",
+                  "object_name": "Lit",
+                  "path_id": "6824069125264728142"
+                }
+              ]
+            }
+          ],
+          "mesh_pointer": {
+            "file_id": 0,
+            "path_id": 2204217602977403589,
+            "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+            "resolved_object_type": "Mesh",
+            "resolved_object_name": "MiniStyle_Tail_Cinnamoroll",
+            "resolution": "internal",
+            "inventory_candidates": []
+          },
+          "bone_count": 1
+        }
+      ],
+      "children": []
+    },
+    {
+      "target_name": "MiniStyle_Tail_Cinnamoroll",
+      "game_object_path_id": 8470397526277919429,
+      "transform": {
+        "path_id": 8381296189517959877,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": [
+        {
+          "target_name": "MiniStyle_Tail_Cinnamoroll",
+          "game_object_path_id": 8107032363643671237,
+          "transform": {
+            "path_id": -4390074020664470843,
+            "type": "Transform",
+            "parent_path_id": 8381296189517959877,
+            "parent_name": "MiniStyle_Tail_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              -0.7071068286895752,
+              0.0,
+              -0.0,
+              0.7071067094802856
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": null,
+          "renderers": [
+            {
+              "path_id": 7910602444779459269,
+              "type": "SkinnedMeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ],
+              "mesh_pointer": {
+                "file_id": 0,
+                "path_id": 2204217602977403589,
+                "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+                "resolved_object_type": "Mesh",
+                "resolved_object_name": "MiniStyle_Tail_Cinnamoroll",
+                "resolution": "internal",
+                "inventory_candidates": []
+              },
+              "bone_count": 1
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "target_name": "Shared_EyeMeshSet_Cinnamoroll",
+      "game_object_path_id": -5845253437082067798,
+      "transform": {
+        "path_id": -603190912728523606,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": [
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteA",
+          "game_object_path_id": 3633442828482223274,
+          "transform": {
+            "path_id": 1714342995600317610,
+            "type": "Transform",
+            "parent_path_id": -603190912728523606,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -7172380915473605462,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -976918226215768567,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteA",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -3877629861147075414,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteB",
+          "game_object_path_id": -3509257228495709014,
+          "transform": {
+            "path_id": 2612858711037090986,
+            "type": "Transform",
+            "parent_path_id": -603190912728523606,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -2100898639994053462,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -8192375654401446391,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteB",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 3378604692624481450,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteC",
+          "game_object_path_id": 2604482582686244010,
+          "transform": {
+            "path_id": 2553764575968140458,
+            "type": "Transform",
+            "parent_path_id": -603190912728523606,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -7818003689589924694,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -5008917051897418231,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteC",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 6078507910000516266,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteD",
+          "game_object_path_id": -8555313771021624150,
+          "transform": {
+            "path_id": 1822550701487791274,
+            "type": "Transform",
+            "parent_path_id": -603190912728523606,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -3902476706761040726,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -8600753165603770871,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteD",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -6668884805772118,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteE",
+          "game_object_path_id": -7910093460210410326,
+          "transform": {
+            "path_id": -5210405821024199510,
+            "type": "Transform",
+            "parent_path_id": -603190912728523606,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -2441439686027862870,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": 8829961245790105097,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteE",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -6649178843474256726,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "target_name": "Shared_EyeMeshSet_Cinnamoroll",
+      "game_object_path_id": 4348937082945465865,
+      "transform": {
+        "path_id": 662811154417905161,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": [
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteA",
+          "game_object_path_id": 8807281379486985737,
+          "transform": {
+            "path_id": 7890541113289928201,
+            "type": "Transform",
+            "parent_path_id": 662811154417905161,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 2178923035815433,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -976918226215768567,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteA",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 7087085920727657993,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteB",
+          "game_object_path_id": 1839306526426394121,
+          "transform": {
+            "path_id": 9154232373369826825,
+            "type": "Transform",
+            "parent_path_id": 662811154417905161,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -954598103634350583,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -8192375654401446391,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteB",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 7365825797851508233,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteC",
+          "game_object_path_id": 5688163907939069449,
+          "transform": {
+            "path_id": 8326026134386896393,
+            "type": "Transform",
+            "parent_path_id": 662811154417905161,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -553559756050403831,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -5008917051897418231,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteC",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -3552456006411162103,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteD",
+          "game_object_path_id": -5651335083673457143,
+          "transform": {
+            "path_id": 4014282815123025417,
+            "type": "Transform",
+            "parent_path_id": 662811154417905161,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 7510032540567596553,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -8600753165603770871,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteD",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 8150468348525211145,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteE",
+          "game_object_path_id": 1361999559275572745,
+          "transform": {
+            "path_id": 1617412829020679689,
+            "type": "Transform",
+            "parent_path_id": 662811154417905161,
+            "parent_name": "Shared_EyeMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 4198502784639430153,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": 8829961245790105097,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_EyeMeshSet_Cinnamoroll_EmoteE",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 6793950312917233161,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "target_name": "Shared_MouthMeshSet_Cinnamoroll",
+      "game_object_path_id": -5989225912186757773,
+      "transform": {
+        "path_id": -3445615935471936141,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": [
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteA",
+          "game_object_path_id": 8123996563602611571,
+          "transform": {
+            "path_id": 2790769075375578483,
+            "type": "Transform",
+            "parent_path_id": -3445615935471936141,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 3877968223301803379,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": 858196089670566749,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteA",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -8657897124407927437,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteB",
+          "game_object_path_id": 1931167251237313907,
+          "transform": {
+            "path_id": 4075175862148210035,
+            "type": "Transform",
+            "parent_path_id": -3445615935471936141,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 5086830336354426227,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -7814661567047105699,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteB",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 8875158426143366515,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteC",
+          "game_object_path_id": -2773853116492997261,
+          "transform": {
+            "path_id": 436301582483987827,
+            "type": "Transform",
+            "parent_path_id": -3445615935471936141,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 218028029621443955,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -4074239470871018659,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteC",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 669841101527326067,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteD",
+          "game_object_path_id": 5255495181275438451,
+          "transform": {
+            "path_id": -4901959168746840717,
+            "type": "Transform",
+            "parent_path_id": -3445615935471936141,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 3224253476862106995,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -413226350627617955,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteD",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 5406515004629523827,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteE",
+          "game_object_path_id": -6999491937206854285,
+          "transform": {
+            "path_id": -1840220507029103245,
+            "type": "Transform",
+            "parent_path_id": -3445615935471936141,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": 5734677807258017139,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": 8527924383576195933,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteE",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -3563956598810141325,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 3,
+                  "path_id": 8047802063870718750,
+                  "resolved_bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "EmoteMesh_FacePlate",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "409c304469c670cadcf88a9676fd814a",
+                      "object_type": "Material",
+                      "object_name": "EmoteMesh_FacePlate",
+                      "path_id": "8047802063870718750"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "target_name": "Shared_MouthMeshSet_Cinnamoroll",
+      "game_object_path_id": -5450096745881238691,
+      "transform": {
+        "path_id": 4443451857419273053,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": [
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteA",
+          "game_object_path_id": 8083903599564391261,
+          "transform": {
+            "path_id": 3156475252331610973,
+            "type": "Transform",
+            "parent_path_id": 4443451857419273053,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -8415470333449895075,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": 858196089670566749,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteA",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -6951419987900923043,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteB",
+          "game_object_path_id": -1227508928931527843,
+          "transform": {
+            "path_id": 5074823270768542557,
+            "type": "Transform",
+            "parent_path_id": 4443451857419273053,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -3323025572491263139,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -7814661567047105699,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteB",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 8439688090238944093,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteC",
+          "game_object_path_id": 4512489267763970909,
+          "transform": {
+            "path_id": 8613647035126940509,
+            "type": "Transform",
+            "parent_path_id": 4443451857419273053,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -707127734886694051,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -4074239470871018659,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteC",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 6407819168523322205,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteD",
+          "game_object_path_id": 778304585785705309,
+          "transform": {
+            "path_id": -5865971912936946851,
+            "type": "Transform",
+            "parent_path_id": 4443451857419273053,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -6089477169300077731,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": -413226350627617955,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteD",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": -4313191035113602211,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        },
+        {
+          "target_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteE",
+          "game_object_path_id": 5641453252687725405,
+          "transform": {
+            "path_id": -8364247010818358435,
+            "type": "Transform",
+            "parent_path_id": 4443451857419273053,
+            "parent_name": "Shared_MouthMeshSet_Cinnamoroll",
+            "local_position": [
+              -0.0,
+              0.0,
+              0.0
+            ],
+            "local_rotation": [
+              0.0,
+              -0.0,
+              -0.0,
+              1.0
+            ],
+            "local_scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "mesh_filter": {
+            "path_id": -6093491016013151395,
+            "mesh_pointer": {
+              "file_id": 0,
+              "path_id": 8527924383576195933,
+              "resolved_bundle_hash": "f75e6233b13254a0a5e316a96d0d3114",
+              "resolved_object_type": "Mesh",
+              "resolved_object_name": "Shared_MouthMeshSet_Cinnamoroll_EmoteE",
+              "resolution": "internal",
+              "inventory_candidates": []
+            }
+          },
+          "renderers": [
+            {
+              "path_id": 1312267390349443933,
+              "type": "MeshRenderer",
+              "materials": [
+                {
+                  "file_id": 9,
+                  "path_id": 6824069125264728142,
+                  "resolved_bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                  "resolved_object_type": "Material",
+                  "resolved_object_name": "Lit",
+                  "resolution": "inventory",
+                  "inventory_candidates": [
+                    {
+                      "bundle_hash": "680e794bd7287dcd6719ff90cfbf9cc3",
+                      "object_type": "Material",
+                      "object_name": "Lit",
+                      "path_id": "6824069125264728142"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "target_name": "Shared_EyePlateTexture_Cinnamoroll",
+      "game_object_path_id": -8580812244306791126,
+      "transform": {
+        "path_id": -66542905766480598,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": []
+    },
+    {
+      "target_name": "Shared_EyePlateTexture_Cinnamoroll",
+      "game_object_path_id": 4938326388178310175,
+      "transform": {
+        "path_id": 1730085593979180063,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": []
+    },
+    {
+      "target_name": "Shared_MouthPlateTexture_Cinnamoroll",
+      "game_object_path_id": 6261646139020793108,
+      "transform": {
+        "path_id": 6218508638008825108,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": []
+    },
+    {
+      "target_name": "Shared_MouthPlateTexture_Cinnamoroll",
+      "game_object_path_id": 7265933309611921971,
+      "transform": {
+        "path_id": -4895370165855399373,
+        "type": "Transform",
+        "parent_path_id": 0,
+        "parent_name": "",
+        "local_position": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "local_rotation": [
+          0.0,
+          -0.0,
+          -0.0,
+          1.0
+        ],
+        "local_scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh_filter": null,
+      "renderers": [],
+      "children": []
+    }
+  ]
+}

@@ -44,6 +44,33 @@ def write_json(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def load_inventory_index(path: Path | None = None, *, object_types: set[str] | None = None) -> dict[int, list[dict[str, str]]]:
+    inventory_path = path or (REPORTS / "bundle_inventory.csv")
+    if not inventory_path.is_file():
+        raise SystemExit(f"Inventory CSV not found: {inventory_path}")
+
+    index: dict[int, list[dict[str, str]]] = {}
+    with inventory_path.open("r", newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            object_type = (row.get("object_type") or "").strip()
+            if object_types and object_type not in object_types:
+                continue
+            try:
+                path_id = int((row.get("path_id") or "0").strip() or "0")
+            except ValueError:
+                continue
+            index.setdefault(path_id, []).append(
+                {
+                    "bundle_hash": (row.get("bundle_hash") or "").strip(),
+                    "object_type": object_type,
+                    "object_name": (row.get("object_name") or "").strip(),
+                    "path_id": str(path_id),
+                }
+            )
+    return index
+
+
 def iter_bundles():
     """Yield all .bundle file paths in BUNDLES_ROOT."""
     yield from sorted(BUNDLES_ROOT.glob("*.bundle"))

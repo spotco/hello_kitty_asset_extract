@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from common import BUNDLES_ROOT, EXTRACTED, iter_bundles, load_unitypy, safe_name, write_json
+from common import BUNDLES_ROOT, EXTRACTED, REPORTS, iter_bundles, load_inventory_index, load_unitypy, safe_name, write_json
 
 TEXTURE_PROPERTY_PRIORITY = [
     "_MainTex",
@@ -20,6 +20,8 @@ TEXTURE_PROPERTY_PRIORITY = [
     "_BaseColorTex",
     "_Diffuse",
 ]
+DEPENDENCY_OBJECT_TYPES = {"Mesh", "Material", "Texture2D"}
+GENERIC_MATERIAL_NAMES = {"Lit", "EmoteMesh_FacePlate"}
 
 
 def pack_glb(gltf_json: dict, bin_data: bytes) -> bytes:
@@ -41,21 +43,131 @@ def pptr_path_id(pptr: Any) -> int:
         return 0
 
 
-def read_pptr(pptr: Any) -> Any | None:
+def pptr_file_id(pptr: Any) -> int:
+    try:
+        return int(getattr(pptr, "m_FileID", 0) or 0)
+    except Exception:
+        return 0
+
+
+class DependencyResolver:
+    def __init__(self, UnityPy, inventory_path: Path | None = None):
+        self.UnityPy = UnityPy
+        self.inventory_path = inventory_path or (REPORTS / "bundle_inventory.csv")
+        self.inventory_index = load_inventory_index(self.inventory_path, object_types=DEPENDENCY_OBJECT_TYPES)
+        self.env_cache: dict[str, Any] = {}
+        self.object_index_cache: dict[str, dict[int, Any]] = {}
+        self.object_data_cache: dict[tuple[str, int], Any | None] = {}
+
+    def inventory_candidates(self, path_id: int, expected_types: set[str] | None = None) -> list[dict[str, str]]:
+        candidates = self.inventory_index.get(path_id, [])
+        if expected_types:
+            candidates = [candidate for candidate in candidates if candidate["object_type"] in expected_types]
+        return sorted(candidates, key=lambda candidate: (candidate["bundle_hash"], candidate["object_type"], candidate["object_name"]))
+
+    def bundle_path(self, bundle_hash: str) -> Path:
+        return BUNDLES_ROOT / f"{bundle_hash}.bundle"
+
+    def load_bundle_env(self, bundle_hash: str):
+        env = self.env_cache.get(bundle_hash)
+        if env is not None:
+            return env
+        bundle_path = self.bundle_path(bundle_hash)
+        if not bundle_path.is_file():
+            raise FileNotFoundError(f"Bundle not found for dependency resolution: {bundle_path}")
+        env = self.UnityPy.load(str(bundle_path))
+        self.env_cache[bundle_hash] = env
+        return env
+
+    def bundle_objects(self, bundle_hash: str) -> dict[int, Any]:
+        objects = self.object_index_cache.get(bundle_hash)
+        if objects is not None:
+            return objects
+        env = self.load_bundle_env(bundle_hash)
+        objects = {obj.path_id: obj for obj in env.objects}
+        self.object_index_cache[bundle_hash] = objects
+        return objects
+
+    def read_object_from_bundle(self, bundle_hash: str, path_id: int) -> Any | None:
+        cache_key = (bundle_hash, path_id)
+        if cache_key in self.object_data_cache:
+            return self.object_data_cache[cache_key]
+
+        obj = self.bundle_objects(bundle_hash).get(path_id)
+        if obj is None:
+            self.object_data_cache[cache_key] = None
+            return None
+
+        try:
+            data = obj.read()
+        except Exception:
+            data = None
+        self.object_data_cache[cache_key] = data
+        return data
+
+    def read_pptr(self, pptr: Any, expected_types: set[str] | None = None) -> Any | None:
+        path_id = pptr_path_id(pptr)
+        if not path_id:
+            return None
+
+        file_id = pptr_file_id(pptr)
+        if file_id == 0:
+            try:
+                return pptr.read()
+            except Exception:
+                return None
+
+        for candidate in self.inventory_candidates(path_id, expected_types):
+            data = self.read_object_from_bundle(candidate["bundle_hash"], path_id)
+            if data is not None:
+                return data
+
+        try:
+            return pptr.read()
+        except Exception:
+            pass
+        return None
+
+
+class BundleAssetLookup:
+    def __init__(self, env: Any, resolver: DependencyResolver):
+        self.materials_by_name: dict[str, list[dict[str, Any]]] = {}
+        self.textures_by_name: dict[str, list[dict[str, Any]]] = {}
+
+        for obj in env.objects:
+            if obj.type.name not in {"Material", "Texture2D"}:
+                continue
+            try:
+                data = obj.read()
+            except Exception:
+                continue
+            name = object_name(data, resolver=resolver)
+            if not name:
+                continue
+            entry = {"path_id": obj.path_id, "data": data}
+            if obj.type.name == "Material":
+                self.materials_by_name.setdefault(name, []).append(entry)
+            else:
+                self.textures_by_name.setdefault(name, []).append(entry)
+
+
+def read_pptr(pptr: Any, resolver: DependencyResolver | None = None, expected_types: set[str] | None = None) -> Any | None:
     if not pptr_path_id(pptr):
         return None
+    if resolver is not None:
+        return resolver.read_pptr(pptr, expected_types=expected_types)
     try:
         return pptr.read()
     except Exception:
         return None
 
 
-def object_name(data: Any, fallback: str = "") -> str:
+def object_name(data: Any, fallback: str = "", resolver: DependencyResolver | None = None) -> str:
     for attr in ("m_Name", "name"):
         value = getattr(data, attr, "")
         if isinstance(value, str) and value.strip():
             return value.strip()
-    game_object = read_pptr(getattr(data, "m_GameObject", None))
+    game_object = read_pptr(getattr(data, "m_GameObject", None), resolver, {"GameObject"})
     if game_object is not None:
         name = getattr(game_object, "m_Name", "")
         if isinstance(name, str) and name.strip():
@@ -88,6 +200,30 @@ def quat_from_obj(value: Any) -> list[float]:
         float(getattr(value, "z", 0.0)),
         float(getattr(value, "w", 1.0)),
     ]
+
+
+def score_name_match(target_lower: str, *texts: str) -> int:
+    target_tokens = {token for token in re.split(r"[^a-z0-9]+", target_lower) if token}
+    best = 0
+    for text in texts:
+        text_lower = (text or "").lower().strip()
+        if not text_lower:
+            continue
+        if text_lower == target_lower:
+            best = max(best, 120)
+        elif text_lower.startswith(target_lower):
+            best = max(best, 80)
+        elif target_lower in text_lower:
+            best = max(best, 40)
+
+        if target_tokens:
+            overlap = len(target_tokens.intersection(token for token in re.split(r"[^a-z0-9]+", text_lower) if token))
+            if overlap:
+                token_score = overlap * 12
+                if overlap == len(target_tokens):
+                    token_score += 24
+                best = max(best, token_score)
+    return best
 
 
 def find_matching_bundles(name: str, UnityPy) -> list[dict[str, Any]]:
@@ -130,7 +266,7 @@ def load_env(bundle_path: Path, UnityPy):
     return UnityPy.load(str(bundle_path))
 
 
-def find_static_renderers(env, target_name: str) -> list[dict[str, Any]]:
+def find_static_renderers(env, target_name: str, resolver: DependencyResolver) -> list[dict[str, Any]]:
     mesh_filters: dict[int, Any] = {}
     mesh_filter_names: dict[int, str] = {}
     for obj in env.objects:
@@ -138,11 +274,15 @@ def find_static_renderers(env, target_name: str) -> list[dict[str, Any]]:
             continue
         try:
             data = obj.read()
-            go = read_pptr(getattr(data, "m_GameObject", None))
+            game_object_pptr = getattr(data, "m_GameObject", None)
+            go = read_pptr(game_object_pptr, resolver, {"GameObject"})
             if go is None:
                 continue
-            mesh_filters[getattr(go, "path_id", 0)] = getattr(data, "m_Mesh", None)
-            mesh_filter_names[getattr(go, "path_id", 0)] = getattr(go, "m_Name", "")
+            go_path_id = pptr_path_id(game_object_pptr)
+            if not go_path_id:
+                continue
+            mesh_filters[go_path_id] = getattr(data, "m_Mesh", None)
+            mesh_filter_names[go_path_id] = getattr(go, "m_Name", "")
         except Exception:
             continue
 
@@ -153,24 +293,28 @@ def find_static_renderers(env, target_name: str) -> list[dict[str, Any]]:
             continue
         try:
             data = obj.read()
-            go = read_pptr(getattr(data, "m_GameObject", None))
+            game_object_pptr = getattr(data, "m_GameObject", None)
+            go = read_pptr(game_object_pptr, resolver, {"GameObject"})
             if go is None:
                 continue
-            go_path_id = getattr(go, "path_id", 0)
+            go_path_id = pptr_path_id(game_object_pptr)
             mesh_pptr = mesh_filters.get(go_path_id)
-            mesh = read_pptr(mesh_pptr)
+            mesh = read_pptr(mesh_pptr, resolver, {"Mesh"})
             if mesh is None:
                 continue
             name = getattr(go, "m_Name", "") or mesh_filter_names.get(go_path_id, "") or "static_mesh"
-            score = 5 if target_lower in name.lower() else 0
+            mesh_name = object_name(mesh, resolver=resolver)
+            score = score_name_match(target_lower, name, mesh_name)
             candidates.append(
                 {
                     "kind": "static",
                     "renderer": data,
                     "renderer_name": name,
+                    "mesh_name": mesh_name,
                     "mesh": mesh,
                     "materials": list(getattr(data, "m_Materials", []) or []),
                     "bones": [],
+                    "texture_hint_names": [name, mesh_name],
                     "score": score,
                 }
             )
@@ -179,9 +323,8 @@ def find_static_renderers(env, target_name: str) -> list[dict[str, Any]]:
     return candidates
 
 
-def select_character_target(env, target_name: str) -> dict[str, Any] | None:
+def select_character_target(env, target_name: str, resolver: DependencyResolver) -> dict[str, Any] | None:
     target_lower = target_name.lower()
-    target_tokens = [token for token in re.split(r"[^a-z0-9]+", target_lower) if token]
     candidates: list[dict[str, Any]] = []
 
     for obj in env.objects:
@@ -189,25 +332,16 @@ def select_character_target(env, target_name: str) -> dict[str, Any] | None:
             continue
         try:
             data = obj.read()
-            mesh = read_pptr(getattr(data, "m_Mesh", None))
+            mesh = read_pptr(getattr(data, "m_Mesh", None), resolver, {"Mesh"})
             if mesh is None:
                 continue
-            go = read_pptr(getattr(data, "m_GameObject", None))
-            renderer_name = getattr(go, "m_Name", "") if go is not None else object_name(data, "skinned_mesh")
-            mesh_name = object_name(mesh)
+            go = read_pptr(getattr(data, "m_GameObject", None), resolver, {"GameObject"})
+            renderer_name = getattr(go, "m_Name", "") if go is not None else object_name(data, "skinned_mesh", resolver)
+            mesh_name = object_name(mesh, resolver=resolver)
             material_count = len(getattr(data, "m_Materials", []) or [])
             bone_count = len(getattr(data, "m_Bones", []) or [])
             combined = " ".join(part for part in [renderer_name, mesh_name] if part)
-            score = 0
-            if target_lower in renderer_name.lower():
-                score += 10
-            if mesh_name and target_lower in mesh_name.lower():
-                score += 6
-            if target_lower in combined.lower():
-                score += 4
-            combined_lower = combined.lower()
-            if target_tokens and all(token in combined_lower for token in target_tokens):
-                score += 40
+            score = score_name_match(target_lower, renderer_name, mesh_name, combined)
             score += min(bone_count, 32)
             score += material_count
             candidates.append(
@@ -215,16 +349,18 @@ def select_character_target(env, target_name: str) -> dict[str, Any] | None:
                     "kind": "skinned",
                     "renderer": data,
                     "renderer_name": renderer_name or mesh_name or "character",
+                    "mesh_name": mesh_name,
                     "mesh": mesh,
                     "materials": list(getattr(data, "m_Materials", []) or []),
                     "bones": list(getattr(data, "m_Bones", []) or []),
+                    "texture_hint_names": [renderer_name, mesh_name],
                     "score": score,
                 }
             )
         except Exception as exc:
             print(f"skip renderer {obj.path_id}: {exc}")
 
-    candidates.extend(find_static_renderers(env, target_name))
+    candidates.extend(find_static_renderers(env, target_name, resolver))
     if not candidates:
         return None
     candidates.sort(key=lambda item: (-item["score"], item["renderer_name"]))
@@ -275,28 +411,44 @@ def extract_texture_pptr(value: Any) -> Any | None:
     return None
 
 
-def export_texture(texture_pptr: Any, textures_dir: Path, texture_cache: dict[int, dict[str, Any]]) -> dict[str, Any] | None:
-    path_id = pptr_path_id(texture_pptr)
+def export_texture_data(
+    texture: Any,
+    path_id: int,
+    textures_dir: Path,
+    texture_cache: dict[int, dict[str, Any]],
+    resolver: DependencyResolver,
+) -> dict[str, Any] | None:
     if not path_id:
         return None
     if path_id in texture_cache:
         return texture_cache[path_id]
-
-    texture = read_pptr(texture_pptr)
-    if texture is None:
-        return None
     image = getattr(texture, "image", None)
     if image is None:
         return None
 
-    filename = f"{safe_name(object_name(texture, 'texture'))}_{path_id}.png"
+    filename = f"{safe_name(object_name(texture, 'texture', resolver))}_{path_id}.png"
     path = textures_dir / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     image.save(path)
-    info = {"path_id": path_id, "name": object_name(texture, "texture"), "file": filename, "uri": f"textures/{filename}"}
+    info = {"path_id": path_id, "name": object_name(texture, "texture", resolver), "file": filename, "uri": f"textures/{filename}"}
     texture_cache[path_id] = info
     print(f"  exported texture {path.name}")
     return info
+
+
+def export_texture(
+    texture_pptr: Any,
+    textures_dir: Path,
+    texture_cache: dict[int, dict[str, Any]],
+    resolver: DependencyResolver,
+) -> dict[str, Any] | None:
+    path_id = pptr_path_id(texture_pptr)
+    if not path_id:
+        return None
+    texture = read_pptr(texture_pptr, resolver, {"Texture2D"})
+    if texture is None:
+        return None
+    return export_texture_data(texture, path_id, textures_dir, texture_cache, resolver)
 
 
 def material_texture_entries(material: Any) -> list[tuple[str, Any]]:
@@ -306,7 +458,99 @@ def material_texture_entries(material: Any) -> list[tuple[str, Any]]:
     return [(str(key), value) for key, value in entries]
 
 
-def collect_materials(material_pptrs: list[Any], out_dir: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def preferred_texture_info(exported_infos: list[dict[str, Any]]) -> dict[str, Any] | None:
+    for property_name in TEXTURE_PROPERTY_PRIORITY:
+        preferred = next((item for item in exported_infos if item["property"] == property_name), None)
+        if preferred is not None:
+            return preferred
+    return exported_infos[0] if exported_infos else None
+
+
+def merge_exported_infos(existing: list[dict[str, Any]], new_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen = {(item["path_id"], item["property"]) for item in existing}
+    for item in new_items:
+        key = (item["path_id"], item["property"])
+        if key in seen:
+            continue
+        existing.append(item)
+        seen.add(key)
+    return existing
+
+
+def overlay_exported_infos(existing: list[dict[str, Any]], new_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    overridden_properties = {item["property"] for item in new_items}
+    preserved = [item for item in existing if item["property"] not in overridden_properties]
+    return merge_exported_infos(preserved, new_items)
+
+
+def collect_material_texture_infos(
+    material: Any,
+    textures_dir: Path,
+    texture_cache: dict[int, dict[str, Any]],
+    resolver: DependencyResolver,
+) -> list[dict[str, Any]]:
+    infos: list[dict[str, Any]] = []
+    for property_name, payload in material_texture_entries(material):
+        texture_pptr = extract_texture_pptr(payload)
+        info = export_texture(texture_pptr, textures_dir, texture_cache, resolver)
+        if info is not None:
+            infos.append({**info, "property": property_name})
+    return infos
+
+
+def strip_emote_suffix(name: str) -> str:
+    return re.sub(r"_Emote[A-Za-z0-9]+$", "", name)
+
+
+def derive_texture_hint_names(names: list[str]) -> list[str]:
+    ordered: list[str] = []
+    seen: set[str] = set()
+
+    def add(value: str) -> None:
+        value = value.strip()
+        if not value or value in seen:
+            return
+        seen.add(value)
+        ordered.append(value)
+
+    for name in names:
+        if not name:
+            continue
+        add(name)
+        stripped = strip_emote_suffix(name)
+        add(stripped)
+        add(stripped.replace("EyeMeshSet", "EyePlateTexture"))
+        add(stripped.replace("MouthMeshSet", "MouthPlateTexture"))
+        add(name.replace("EyeMeshSet", "EyePlateTexture"))
+        add(name.replace("MouthMeshSet", "MouthPlateTexture"))
+    return ordered
+
+
+def collect_named_texture_fallbacks(
+    texture_hint_names: list[str],
+    lookup: BundleAssetLookup,
+    textures_dir: Path,
+    texture_cache: dict[int, dict[str, Any]],
+    resolver: DependencyResolver,
+) -> list[dict[str, Any]]:
+    infos: list[dict[str, Any]] = []
+    suffix_property_map = {"_C": "_BaseMap", "_N": "_BumpMap", "_X": "_ComboMap"}
+    for hint_name in derive_texture_hint_names(texture_hint_names):
+        for suffix, property_name in suffix_property_map.items():
+            for entry in lookup.textures_by_name.get(f"{hint_name}{suffix}", []):
+                info = export_texture_data(entry["data"], entry["path_id"], textures_dir, texture_cache, resolver)
+                if info is not None:
+                    infos.append({**info, "property": property_name})
+    return infos
+
+
+def collect_materials(
+    material_pptrs: list[Any],
+    out_dir: Path,
+    resolver: DependencyResolver,
+    lookup: BundleAssetLookup,
+    texture_hint_names: list[str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     materials_json: list[dict[str, Any]] = []
     images_json: list[dict[str, Any]] = []
     textures_json: list[dict[str, Any]] = []
@@ -315,25 +559,42 @@ def collect_materials(material_pptrs: list[Any], out_dir: Path) -> tuple[list[di
     textures_dir = out_dir / "textures"
 
     for index, material_pptr in enumerate(material_pptrs):
-        material = read_pptr(material_pptr)
-        material_name = object_name(material, f"material_{index}") if material is not None else f"material_{index}"
+        material = read_pptr(material_pptr, resolver, {"Material"})
+        material_name = object_name(material, f"material_{index}", resolver) if material is not None else f"material_{index}"
         exported_infos: list[dict[str, Any]] = []
+        fallback_material_name = None
         if material is not None:
-            for property_name, payload in material_texture_entries(material):
-                texture_pptr = extract_texture_pptr(payload)
-                info = export_texture(texture_pptr, textures_dir, texture_cache)
-                if info is not None:
-                    info = {**info, "property": property_name}
-                    exported_infos.append(info)
+            exported_infos = collect_material_texture_infos(material, textures_dir, texture_cache, resolver)
+        generic_material = material_name in GENERIC_MATERIAL_NAMES or any(item["name"].startswith("Default") for item in exported_infos)
+
+        if generic_material or preferred_texture_info(exported_infos) is None:
+            for hint_name in derive_texture_hint_names(texture_hint_names):
+                if hint_name == material_name:
+                    continue
+                fallback_entries = lookup.materials_by_name.get(hint_name, [])
+                if not fallback_entries:
+                    continue
+                for entry in fallback_entries:
+                    fallback_infos = collect_material_texture_infos(entry["data"], textures_dir, texture_cache, resolver)
+                    if fallback_infos:
+                        if generic_material:
+                            exported_infos = overlay_exported_infos(exported_infos, fallback_infos)
+                        else:
+                            merge_exported_infos(exported_infos, fallback_infos)
+                        fallback_material_name = hint_name
+                        break
+                if preferred_texture_info(exported_infos) is not None:
+                    break
+
+        fallback_texture_infos = collect_named_texture_fallbacks(texture_hint_names, lookup, textures_dir, texture_cache, resolver)
+        if fallback_texture_infos and (generic_material or preferred_texture_info(exported_infos) is None):
+            if generic_material:
+                exported_infos = overlay_exported_infos(exported_infos, fallback_texture_infos)
+            else:
+                merge_exported_infos(exported_infos, fallback_texture_infos)
 
         base_texture_index = None
-        preferred = None
-        for property_name in TEXTURE_PROPERTY_PRIORITY:
-            preferred = next((item for item in exported_infos if item["property"] == property_name), None)
-            if preferred is not None:
-                break
-        if preferred is None and exported_infos:
-            preferred = exported_infos[0]
+        preferred = preferred_texture_info(exported_infos)
         if preferred is not None:
             image_index = len(images_json)
             images_json.append({"uri": preferred["uri"], "name": preferred["name"]})
@@ -348,7 +609,10 @@ def collect_materials(material_pptrs: list[Any], out_dir: Path) -> tuple[list[di
         if base_texture_index is not None:
             material_json["pbrMetallicRoughness"]["baseColorTexture"] = {"index": base_texture_index}
         materials_json.append(material_json)
-        material_summaries.append({"name": material_name, "textures": exported_infos})
+        summary = {"name": material_name, "textures": exported_infos}
+        if fallback_material_name is not None:
+            summary["fallback_material_name"] = fallback_material_name
+        material_summaries.append(summary)
 
     if not materials_json:
         materials_json.append(
@@ -361,12 +625,12 @@ def collect_materials(material_pptrs: list[Any], out_dir: Path) -> tuple[list[di
     return material_summaries, [materials_json, images_json, textures_json]
 
 
-def resolve_bone_hierarchy(smr_bones_pptrlist) -> list[dict[str, Any]]:
+def resolve_bone_hierarchy(smr_bones_pptrlist, resolver: DependencyResolver) -> list[dict[str, Any]]:
     bones: list[dict[str, Any]] = []
     path_id_to_bone_idx: dict[int, int] = {}
 
     for index, bone_pptr in enumerate(smr_bones_pptrlist):
-        transform = read_pptr(bone_pptr)
+        transform = read_pptr(bone_pptr, resolver, {"Transform"})
         if transform is None:
             bones.append(
                 {
@@ -380,7 +644,7 @@ def resolve_bone_hierarchy(smr_bones_pptrlist) -> list[dict[str, Any]]:
             )
             continue
 
-        go = read_pptr(getattr(transform, "m_GameObject", None))
+        go = read_pptr(getattr(transform, "m_GameObject", None), resolver, {"GameObject"})
         name = getattr(go, "m_Name", f"bone_{index}") if go is not None else f"bone_{index}"
         lp = vec3_from_obj(getattr(transform, "m_LocalPosition", None), (0.0, 0.0, 0.0))
         lr = quat_from_obj(getattr(transform, "m_LocalRotation", None))
@@ -399,7 +663,7 @@ def resolve_bone_hierarchy(smr_bones_pptrlist) -> list[dict[str, Any]]:
         path_id_to_bone_idx[path_id] = index
 
     for index, bone_pptr in enumerate(smr_bones_pptrlist):
-        transform = read_pptr(bone_pptr)
+        transform = read_pptr(bone_pptr, resolver, {"Transform"})
         if transform is None:
             continue
         father = getattr(transform, "m_Father", None)
@@ -456,6 +720,8 @@ def build_gltf(
     mesh: Any,
     target: dict[str, Any],
     out_dir: Path,
+    resolver: DependencyResolver,
+    lookup: BundleAssetLookup,
     *,
     force_static: bool = False,
     skeleton_source: str = "local",
@@ -476,9 +742,15 @@ def build_gltf(
     if not triangle_groups:
         raise RuntimeError("Mesh has no triangle data")
 
-    print(f"Mesh '{object_name(mesh, 'mesh')}' has {len(vertices)} vertices across {len(triangle_groups)} submesh(es)")
+    print(f"Mesh '{object_name(mesh, 'mesh', resolver)}' has {len(vertices)} vertices across {len(triangle_groups)} submesh(es)")
 
-    material_summaries, material_payload = collect_materials(target["materials"], out_dir)
+    material_summaries, material_payload = collect_materials(
+        target["materials"],
+        out_dir,
+        resolver,
+        lookup,
+        target.get("texture_hint_names", [target["renderer_name"]]),
+    )
     materials_json, images_json, textures_json = material_payload
 
     buffer = bytearray()
@@ -608,7 +880,7 @@ def build_gltf(
     skins = []
     skin_used = False
     if can_skin:
-        bones = resolve_bone_hierarchy(target["bones"])
+        bones = resolve_bone_hierarchy(target["bones"], resolver)
         bind_poses = list(getattr(mesh, "m_BindPose", []) or [])
         if bones and bind_poses and len(bind_poses) >= len(bones):
             converted_bind_poses = [matrix_to_gltf_columns(bind_pose) for bind_pose in bind_poses[: len(bones)]]
@@ -649,7 +921,7 @@ def build_gltf(
         "scene": 0,
         "scenes": [{"name": "scene", "nodes": scene_nodes}],
         "nodes": nodes,
-        "meshes": [{"name": object_name(mesh, "character"), "primitives": primitives}],
+        "meshes": [{"name": object_name(mesh, "character", resolver), "primitives": primitives}],
         "materials": materials_json,
         "buffers": [{"byteLength": len(buffer)}],
         "bufferViews": buffer_views,
@@ -662,7 +934,7 @@ def build_gltf(
         gltf_json["skins"] = skins
 
     metadata = {
-        "mesh_name": object_name(mesh, "character"),
+        "mesh_name": object_name(mesh, "character", resolver),
         "renderer_name": target["renderer_name"],
         "vertex_count": len(vertices),
         "submesh_count": len(primitives),
@@ -732,6 +1004,7 @@ def main() -> int:
     parser.add_argument("--bundle-hash", help="Optional specific bundle hash (with or without .bundle)")
     parser.add_argument("--slug", help="Optional output slug. Defaults to a safe version of --name.")
     parser.add_argument("--no-skin", action="store_true", help="Export geometry without skin, joints, weights, or inverse bind matrices.")
+    parser.add_argument("--inventory", type=Path, default=REPORTS / "bundle_inventory.csv", help="Inventory CSV used to resolve external Mesh, Material, and Texture2D pointers.")
     parser.add_argument(
         "--skeleton-source",
         choices=("local", "bind-pose"),
@@ -744,6 +1017,7 @@ def main() -> int:
         raise SystemExit(f"Bundles directory not found: {BUNDLES_ROOT}")
 
     UnityPy = load_unitypy()
+    resolver = DependencyResolver(UnityPy, args.inventory)
     if args.bundle_hash:
         bundle_path = resolve_bundle_path(args.bundle_hash)
         candidates = [{"bundle": bundle_path, "matches": []}]
@@ -755,7 +1029,8 @@ def main() -> int:
     chosen = candidates[0]
     bundle_path = chosen["bundle"]
     env = load_env(bundle_path, UnityPy)
-    target = select_character_target(env, args.name)
+    lookup = BundleAssetLookup(env, resolver)
+    target = select_character_target(env, args.name, resolver)
     if target is None:
         raise SystemExit(f"No suitable renderer found in bundle {bundle_path.name}")
 
@@ -765,7 +1040,15 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     clear_previous_textures(out_dir / "textures")
 
-    gltf_json, bin_data, metadata = build_gltf(mesh, target, out_dir, force_static=args.no_skin, skeleton_source=args.skeleton_source)
+    gltf_json, bin_data, metadata = build_gltf(
+        mesh,
+        target,
+        out_dir,
+        resolver,
+        lookup,
+        force_static=args.no_skin,
+        skeleton_source=args.skeleton_source,
+    )
     glb_bytes = pack_glb(gltf_json, bin_data)
     glb_path = out_dir / "character.glb"
     glb_path.write_bytes(glb_bytes)
